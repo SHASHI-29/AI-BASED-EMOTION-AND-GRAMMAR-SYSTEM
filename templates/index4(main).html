@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Emotion Analyzer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --primary-color: #6c63ff;
+            --secondary-color: #4a00e0;
+            --accent-color: #00e5ff;
+            --dark-bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --light-text: #f8fafc;
+            --success-color: #4ade80;
+            --warning-color: #fb923c;
+            --error-color: #f87171;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--dark-bg), #1e1b4b);
+            color: var(--light-text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            backdrop-filter: blur(10px);
+            background: rgba(15, 23, 42, 0.6);
+            padding: 1.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            color: var(--accent-color);
+            font-size: 1.75rem;
+            filter: drop-shadow(0 0 8px rgba(0, 229, 255, 0.6));
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--accent-color), var(--primary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        nav {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .nav-link {
+            color: var(--light-text);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 0.5rem 0;
+        }
+
+        .nav-link:hover {
+            color: var(--accent-color);
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent-color);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        main {
+            flex: 1;
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .hero-section {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeIn 1s ease-out;
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, var(--accent-color), var(--primary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .hero-subtitle {
+            font-size: 1.125rem;
+            font-weight: 300;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            line-height: 1.6;
+        }
+
+        .emotion-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .emotion-chip {
+            background: rgba(108, 99, 255, 0.2);
+            border: 1px solid rgba(108, 99, 255, 0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 30px;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .emotion-chip:nth-child(2n) {
+            background: rgba(0, 229, 255, 0.2);
+            border-color: rgba(0, 229, 255, 0.3);
+        }
+
+        .emotion-chip:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.25rem;
+            color: var(--accent-color);
+        }
+
+        .card-icon {
+            font-size: 1.5rem;
+            background: rgba(0, 229, 255, 0.2);
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+        }
+
+        #uploadCard .card-icon {
+            color: #a78bfa;
+            background: rgba(167, 139, 250, 0.2);
+        }
+
+        #recordCard .card-icon {
+            color: #fb923c;
+            background: rgba(251, 146, 60, 0.2);
+        }
+
+        .file-upload-container {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .file-upload-input {
+            opacity: 0;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            z-index: 2;
+        }
+
+        .file-upload-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            border: 2px dashed rgba(167, 139, 250, 0.4);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload-label:hover {
+            border-color: var(--primary-color);
+            background: rgba(108, 99, 255, 0.1);
+        }
+
+        .upload-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #a78bfa;
+        }
+
+        .upload-text {
+            font-size: 0.875rem;
+            text-align: center;
+        }
+
+        .upload-file-name {
+            margin-top: 1rem;
+            font-size: 0.875rem;
+            color: var(--accent-color);
+            word-break: break-all;
+        }
+
+        .record-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .audio-visualizer {
+            width: 100%;
+            height: 80px;
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .visualizer-bars {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            height: 100%;
+            padding: 0 0.5rem;
+        }
+
+        .visualizer-bar {
+            width: 4px;
+            background: linear-gradient(to top, var(--accent-color), var(--primary-color));
+            border-radius: 2px;
+            transition: height 0.1s ease;
+        }
+
+        .audio-wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            opacity: 0.6;
+        }
+
+        .record-button {
+            position: relative;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff7e5f, #feb47b);
+            box-shadow: 0 5px 15px rgba(255, 126, 95, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .record-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(255, 126, 95, 0.5);
+        }
+
+        .record-icon {
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .record-pulse {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: rgba(255, 126, 95, 0.4);
+            z-index: -1;
+            opacity: 0;
+            animation: pulse 2s infinite;
+            display: none;
+        }
+
+        .record-button.recording .record-pulse {
+            display: block;
+        }
+
+        .record-button.recording {
+            background: linear-gradient(135deg, #f87171, #dc2626);
+            animation: recording-pulse 2s infinite;
+        }
+
+        .record-status {
+            font-size: 0.875rem;
+            margin-top: 1rem;
+            color: var(--light-text);
+        }
+
+        .record-timer {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--accent-color);
+            margin-top: 0.5rem;
+        }
+
+        .audio-player {
+            width: 100%;
+            margin-top: 1.5rem;
+            display: none;
+        }
+
+        .audio-player-container {
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            margin-top: 3rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            box-shadow: 0 5px 15px rgba(108, 99, 255, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(108, 99, 255, 0.5);
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .loading-content {
+            text-align: center;
+        }
+
+        .loading-spinner {
+            width: 100px;
+            height: 100px;
+            border: 4px solid rgba(108, 99, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s linear infinite;
+            margin: 0 auto 2rem;
+        }
+
+        .loading-text {
+            font-size: 1.25rem;
+            color: var(--light-text);
+            margin-bottom: 1rem;
+        }
+
+        .loading-progress {
+            width: 300px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 0 auto;
+        }
+
+        .loading-bar {
+            height: 100%;
+            background: linear-gradient(to right, var(--accent-color), var(--primary-color));
+            width: 0;
+            transition: width 0.3s ease;
+            animation: loading-progress 3s ease-in-out;
+        }
+
+        .result-container {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto;
+            animation: fadeIn 0.8s ease-out;
+            display: none;
+        }
+
+        .result-title {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            color: var(--accent-color);
+        }
+
+        .result-emotion {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, var(--accent-color), var(--primary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .result-details {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .result-item {
+            text-align: center;
+        }
+
+        .result-item-title {
+            font-size: 0.875rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 0.5rem;
+        }
+
+        .result-item-value {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--light-text);
+        }
+
+        .result-description {
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .emotion-chart {
+            height: 200px;
+            margin-bottom: 2rem;
+        }
+
+        footer {
+            backdrop-filter: blur(10px);
+            background: rgba(15, 23, 42, 0.6);
+            padding: 2rem 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: auto;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .footer-logo {
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-link {
+            color: var(--light-text);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-link:hover {
+            color: var(--accent-color);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .social-link {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--light-text);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .social-link:hover {
+            background: var(--primary-color);
+            transform: translateY(-3px);
+        }
+
+        .footer-copy {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.875rem;
+        }
+
+        .floating-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        #downloadLink {
+            color: var(--accent-color);
+            text-decoration: none;
+            margin-top: 1rem;
+            display: none;
+            font-size: 0.875rem;
+            transition: color 0.3s ease;
+        }
+
+        #downloadLink:hover {
+            color: var(--light-text);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.7; }
+            70% { transform: scale(1.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 0; }
+        }
+
+        @keyframes recording-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(248, 113, 113, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(248, 113, 113, 0); }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+
+        @keyframes loading-progress {
+            0% { width: 0; }
+            50% { width: 70%; }
+            100% { width: 100%; }
+        }
+
+        @keyframes waveAnimation {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100%); }
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+
+            .card-container {
+                grid-template-columns: 1fr;
+            }
+
+            .result-details {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            nav {
+                margin-top: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-particles" id="particles"></div>
+
+    <div class="app-container">
+        <header>
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-waveform-voice logo-icon"></i>
+                    <h1 class="logo-text">VoiceInsight</h1>
+                </div>
+                <nav>
+                    <a href="home(main).html" class="nav-link">Home</a>
+                    <a href="#" class="nav-link">About</a>
+                    <a href="#" class="nav-link">Features</a>
+                    <a href="#" class="nav-link">Contact</a>
+                </nav>
+            </div>
+        </header>
+
+        <main>
+            <section class="hero-section">
+                <h1 class="hero-title animate_animated animate_fadeIn">Voice Emotion Analysis</h1>
+                <p class="hero-subtitle animate_animated animatefadeIn animate_delay-1s">Upload or record your voice to analyze emotions and discover the feelings behind your words.</p>
+
+                <div class="emotion-grid animate_animated animatefadeIn animate_delay-2s">
+                    <div class="emotion-chip"><i class="fas fa-smile"></i> Happy</div>
+                    <div class="emotion-chip"><i class="fas fa-frown"></i> Sad</div>
+                    <div class="emotion-chip"><i class="fas fa-angry"></i> Angry</div>
+                    <div class="emotion-chip"><i class="fas fa-surprise"></i> Surprised</div>
+                    <div class="emotion-chip"><i class="fas fa-meh"></i> Neutral</div>
+                    <div class="emotion-chip"><i class="fas fa-tired"></i> Fear</div>
+                </div>
+            </section>
+
+            <div class="card-container">
+                <div class="card" id="uploadCard">
+                    <div class="card-title">
+                        <div class="card-icon">
+                            <i class="fas fa-file-audio"></i>
+                        </div>
+                        <h2>Upload Audio</h2>
+                    </div>
+
+                    <div class="file-upload-container">
+                        <input type="file" id="audioFile" class="file-upload-input" accept="audio/*">
+                        <label for="audioFile" class="file-upload-label">
+                            <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                            <span class="upload-text">Drag & drop your audio file or click to browse</span>
+                            <span id="uploadFileName" class="upload-file-name"></span>
+                        </label>
+                    </div>
+
+                    <div class="audio-player-container" id="uploadPlayerContainer" style="display: none;">
+                        <audio id="uploadPlayer" controls class="audio-player"></audio>
+                    </div>
+                </div>
+
+                <div class="card" id="recordCard">
+                    <div class="card-title">
+                        <div class="card-icon">
+                            <i class="fas fa-microphone"></i>
+                        </div>
+                        <h2>Record Audio</h2>
+                    </div>
+
+                    <div class="record-controls">
+                        <div class="audio-visualizer">
+                            <div class="visualizer-bars" id="visualizerBars">
+                            </div>
+                        </div>
+
+                        <button id="recordButton" class="record-button">
+                            <i class="fas fa-microphone record-icon"></i>
+                            <div class="record-pulse"></div>
+                        </button>
+
+                        <div class="record-status">
+                            <span id="recordStatus">Click to start recording</span>
+                            <div id="recordTimer" class="record-timer">00:00</div>
+                        </div>
+                    </div>
+
+                    <div class="audio-player-container" id="recordPlayerContainer" style="display: none;">
+                        <audio id="audioPlayer" controls class="audio-player"></audio>
+                        <a id="downloadLink" href="#" download="recorded_audio.wav">
+                            <i class="fas fa-download"></i> Download Recording
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button id="analyzeEmotion" class="btn btn-primary">
+                    <i class="fas fa-brain"></i> Analyze Emotion
+                </button>
+            </div>
+            <br/>
+            <br/>
+
+            <div class="result-container" id="resultContainer">
+                <h2 class="result-title">Analysis Results</h2>
+                <div class="result-emotion" id="emotion">Happiness</div>
+
+                <p class="result-description">
+                    Your voice shows a high level of happiness. The analysis detected positive tone patterns and enthusiastic speech rhythms typical of joyful expressions.
+                </p>
+
+            </div>
+        </main>
+
+        <footer>
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <div class="logo">
+                        <i class="fas fa-waveform-voice logo-icon"></i>
+                        <h1 class="logo-text">VoiceInsight</h1>
+                    </div>
+                </div>
+
+                <div class="footer-links">
+                    <a href="#" class="footer-link">Privacy Policy</a>
+                    <a href="#" class="footer-link">Terms of Service</a>
+                    <a href="#" class="footer-link">FAQ</a>
+                    <a href="#" class="footer-link">Support</a>
+                </div>
+
+                <div class="social-links">
+                    <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
+                </div>
+
+                <p class="footer-copy">&copy; 2025 VoiceInsight. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <div class="loading-text" id="loadingText">Analyzing your audio...</div>
+            <div class="loading-progress">
+                <div class="loading-bar" id="loadingBar"></div>
+            </div>
+        </div>
+    </div>
+    <script>
+    // Recording variables
+    let mediaRecorder;
+    let audioChunks = [];
+    let audioBlob = null;
+    let isRecording = false;
+    let recordingStartTime;
+    let timerInterval;
+
+    // DOM elements
+    const fileInput = document.getElementById('audioFile');
+    const uploadPlayer = document.getElementById('uploadPlayer');
+    const audioPlayer = document.getElementById('audioPlayer');
+    const fileNameDisplay = document.getElementById('uploadFileName');
+    const uploadPlayerContainer = document.getElementById('uploadPlayerContainer');
+    const downloadLink = document.getElementById('downloadLink');
+    const recordPlayerContainer = document.getElementById('recordPlayerContainer');
+
+    // Initialize app
+    function initApp() {
+        createParticles();
+        createVisualizerBars();
+        setupFileUpload();
+        setupRecording();
+        setupAnalyzeButton();
+    }
+
+    // File upload handling
+    function setupFileUpload() {
+        fileInput.addEventListener('change', (event) => {
+            audioBlob = null;
+            //resetRecordingUI();
+
+            const file = event.target.files[0];
+            if (file) {
+                fileNameDisplay.textContent = file.name;
+                uploadPlayer.src = URL.createObjectURL(file);
+                uploadPlayerContainer.style.display = 'block';
+            } else if (!event.target.files.length) {
+                fileNameDisplay.textContent = '';
+                uploadPlayerContainer.style.display = 'none';
+            }
+        });
+    }
+
+    // Recording functionality
+    function setupRecording() {
+        const recordButton = document.getElementById('recordButton');
+        const recordStatus = document.getElementById('recordStatus');
+        const recordTimer = document.getElementById('recordTimer');
+        const visualizerBars = document.querySelectorAll('.visualizer-bar');
+
+        recordButton.addEventListener('click', toggleRecording);
+
+        async function toggleRecording() {
+            if (!isRecording) {
+                try {
+                    fileInput.value = '';
+                    uploadPlayer.src = '';
+                    fileNameDisplay.textContent = '';
+                    uploadPlayerContainer.style.display = 'none';
+
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    startRecording(stream);
+                } catch (err) {
+                    alert("Microphone access required for recording.");
+                }
+            } else {
+                stopRecording();
+            }
+        }
+
+        function startRecording(stream) {
+            mediaRecorder = new MediaRecorder(stream);
+            audioChunks = [];
+            isRecording = true;
+            recordingStartTime = Date.now();
+
+            mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+            mediaRecorder.onstop = () => {
+                audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                const audioUrl = URL.createObjectURL(audioBlob);
+                audioPlayer.src = audioUrl;
+                downloadLink.href = audioUrl;
+                recordPlayerContainer.style.display = 'block';
+                downloadLink.style.display = 'block';
+                stopVisualizerAnimation();
+            };
+
+            mediaRecorder.start();
+            updateRecordingUI(true);
+            startTimer();
+            startVisualizerAnimation();
+        }
+
+        function stopRecording() {
+            mediaRecorder.stop();
+            mediaRecorder.stream.getTracks().forEach(track => track.stop());
+            isRecording = false;
+            clearInterval(timerInterval);
+            updateRecordingUI(false);
+        }
+
+        function updateRecordingUI(recording) {
+            recordButton.classList.toggle('recording', recording);
+            recordStatus.textContent = recording ? 'Recording...' : 'Recording ready';
+            recordButton.querySelector('.record-icon').className =
+                `fas ${recording ? 'fa-stop' : 'fa-microphone'} record-icon`;
+        }
+
+        function resetRecordingUI() {
+            recordPlayerContainer.style.display = 'none';
+            downloadLink.style.display = 'none';
+            recordTimer.textContent = '00:00';
+            stopVisualizerAnimation();
+        }
+
+        function startTimer() {
+            recordTimer.textContent = '00:00';
+            timerInterval = setInterval(() => {
+                const elapsed = Date.now() - recordingStartTime;
+                const mins = Math.floor(elapsed / 60000).toString().padStart(2, '0');
+                const secs = Math.floor((elapsed % 60000) / 1000).toString().padStart(2, '0');
+                recordTimer.textContent = `${mins}:${secs}`;
+            }, 1000);
+        }
+
+        function startVisualizerAnimation() {
+            const animate = () => {
+                if (!isRecording) return;
+                visualizerBars.forEach(bar => {
+                    bar.style.height = `${Math.random() * 70 + 5}px`;
+                });
+                requestAnimationFrame(animate);
+            };
+            animate();
+        }
+
+        function stopVisualizerAnimation() {
+            visualizerBars.forEach(bar => bar.style.height = '5px');
+        }
+    }
+
+    // Analysis functionality
+    function setupAnalyzeButton() {
+        const analyzeButton = document.getElementById('analyzeEmotion');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const resultContainer = document.getElementById('resultContainer');
+        const emotionDisplay = document.getElementById('emotion');
+
+        analyzeButton.addEventListener('click', async () => {
+            const formData = new FormData();
+
+            if (fileInput.files[0]) {
+                formData.append('audio_data', fileInput.files[0], fileInput.files[0].name);
+            } else if (audioBlob) {
+                formData.append('audio_data', audioBlob, 'recording.wav');
+            } else {
+                alert("Please record or upload an audio file first.");
+                return;
+            }
+
+            try {
+                loadingOverlay.style.opacity = '1';
+                loadingOverlay.style.visibility = 'visible';
+
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error('Analysis failed');
+
+                const data = await response.json();
+                emotionDisplay.textContent = data.prediction;
+                updateResultDescription(data.prediction);
+                resultContainer.style.display = 'block';
+                resultContainer.scrollIntoView({ behavior: 'smooth' });
+
+            } catch (error) {
+                console.error('Analysis error:', error);
+                alert('Analysis failed. Please try again.');
+            } finally {
+                loadingOverlay.style.opacity = '0';
+                loadingOverlay.style.visibility = 'hidden';
+            }
+        });
+    }
+
+    // Update result description
+    function updateResultDescription(emotion) {
+        const descriptionElement = document.querySelector('.result-description');
+        const descriptions = {
+            'happiness': 'Your voice shows a high level of happiness. The analysis detected positive tone patterns and enthusiastic speech rhythms typical of joyful expressions.',
+            'sadness': 'Your voice reveals signs of sadness. The analysis identified lower tones, slower speech patterns, and emotional inflections commonly associated with melancholy.',
+            'angry': 'Your voice indicates anger. The analysis found increased volume, sharp tone changes, and intense speech patterns characteristic of frustration or irritation.',
+            'fear': 'Your voice suggests feelings of fear or anxiety. The analysis detected trembling tones, hesitations, and pitch variations often linked to nervous states.',
+            'disgust': 'Your voice expresses disgust. The analysis detected nasalized sounds, a lowered pitch, and a tense vocal quality often associated with aversion and repulsion.',
+            'confidence': 'Your voice conveys confidence. The analysis identified steady pitch, clear articulation, and a firm tone that signals self-assurance and decisiveness.',
+            'neutral': 'Your voice appears emotionally neutral. The analysis found consistent tone, regular rhythm, and balanced speech patterns without strong emotional markers.'
+        };
+        descriptionElement.textContent = descriptions[emotion.toLowerCase()] || 'Analysis complete.';
+    }
+
+    // Visual elements
+    function createParticles() {
+        const particlesContainer = document.getElementById('particles');
+        for (let i = 0; i < 30; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.cssText = `
+                left: ${Math.random() * 100}%;
+                top: ${Math.random() * 100}%;
+                width: ${Math.random() * 4 + 2}px;
+                height: ${particle.style.width};
+                opacity: ${Math.random() * 0.4 + 0.1};
+                animation: float ${Math.random() * 20 + 10}s infinite ${Math.random() * 10}s;
+            `;
+            particlesContainer.appendChild(particle);
+        }
+    }
+
+    function createVisualizerBars() {
+        const barsContainer = document.getElementById('visualizerBars');
+        for (let i = 0; i < 40; i++) {
+            const bar = document.createElement('div');
+            bar.className = 'visualizer-bar';
+            barsContainer.appendChild(bar);
+        }
+    }
+
+    // Initialize application
+    document.addEventListener('DOMContentLoaded', initApp);
+</script>
+
+</body>
+</html>

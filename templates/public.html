@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speech to Text with Grammar Correction</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --primary-color: #6c63ff;
+            --secondary-color: #4a00e0;
+            --accent-color: #00e5ff;
+            --dark-bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --light-text: #f8fafc;
+            --success-color: #4ade80;
+            --warning-color: #fb923c;
+            --error-color: #f87171;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--dark-bg), #1e1b4b);
+            color: var(--light-text);
+            min-height: 100vh;
+            margin: 0;
+            padding: 2rem;
+        }
+
+        .floating-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            background: linear-gradient(to right, var(--accent-color), var(--primary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 1rem 1.5rem;
+            border-radius: 30px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: var(--light-text);
+        }
+
+        button:disabled {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.4);
+            cursor: not-allowed;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(108, 99, 255, 0.5);
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            margin-bottom: 1rem;
+            padding: 10px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(15, 23, 42, 0.6);
+            color: var(--light-text);
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        textarea:focus {
+            border-color: var(--accent-color);
+            outline: none;
+        }
+
+        #originalText {
+            border-color: rgba(108, 99, 255, 0.4);
+        }
+
+        #correctedText {
+            border-color: rgba(0, 229, 255, 0.4);
+        }
+
+        #status {
+            color: var(--accent-color);
+            margin-bottom: 1.5rem;
+            min-height: 24px;
+            font-weight: 500;
+        }
+
+        .error {
+            color: var(--error-color);
+            padding: 1rem;
+            background: rgba(248, 113, 113, 0.1);
+            border-radius: 12px;
+            margin: 1rem 0;
+            border: 1px solid rgba(248, 113, 113, 0.3);
+        }
+
+        .section-title {
+            font-weight: 600;
+            margin: 1rem 0;
+            color: var(--accent-color);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="floating-particles" id="particles"></div>
+    <div class="container">
+        <h1>Speech to Text with Grammar Correction</h1>
+
+        <div class="card">
+            <div class="controls">
+                <button id="startBtn">
+                    <i class="fas fa-microphone"></i>
+                    Start Recording
+                </button>
+                <button id="stopBtn" disabled>
+                    <i class="fas fa-stop"></i>
+                    Stop Recording
+                </button>
+                <button id="correctBtn" disabled>
+                    <i class="fas fa-magic"></i>
+                    Correct Text
+                </button>
+            </div>
+
+            <div id="status">Ready to record</div>
+            <div id="error" class="error" style="display: none;"></div>
+
+            <div class="section-title">Original Text:</div>
+            <textarea id="originalText" readonly></textarea>
+
+            <div class="section-title">Corrected Text:</div>
+            <textarea id="correctedText" readonly></textarea>
+        </div>
+    </div>
+
+    <script>
+        // Add particle animation script
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.cssText = `
+                    left: ${Math.random() * 100}%;
+                    top: ${Math.random() * 100}%;
+                    width: ${Math.random() * 4 + 2}px;
+                    height: ${particle.style.width};
+                    opacity: ${Math.random() * 0.4 + 0.1};
+                    animation: float ${Math.random() * 20 + 10}s infinite ${Math.random() * 10}s;
+                `;
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            createParticles();
+            // Original JavaScript code remains unchanged
+            const startBtn = document.getElementById('startBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            const correctBtn = document.getElementById('correctBtn');
+            const status = document.getElementById('status');
+            const originalText = document.getElementById('originalText');
+            const correctedText = document.getElementById('correctedText');
+            const errorDiv = document.getElementById('error');
+
+            let recognition;
+            let finalTranscript = '';
+
+            if (!('webkitSpeechRecognition' in window)) {
+                showError("Speech recognition not supported in this browser. Try Chrome or Edge.");
+                startBtn.disabled = true;
+            }
+
+            startBtn.addEventListener('click', startRecording);
+            stopBtn.addEventListener('click', stopRecording);
+            correctBtn.addEventListener('click', correctWithGemini);
+
+            function showError(message) {
+                errorDiv.textContent = message;
+                errorDiv.style.display = 'block';
+            }
+
+            function hideError() {
+                errorDiv.style.display = 'none';
+            }
+
+            function startRecording() {
+                try {
+                    hideError();
+                    startBtn.disabled = true;
+                    stopBtn.disabled = false;
+                    correctBtn.disabled = true;
+                    status.textContent = "Recording... Speak now";
+                    finalTranscript = '';
+                    originalText.value = '';
+                    correctedText.value = '';
+
+                    recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+                    recognition.continuous = true;
+                    recognition.interimResults = false;
+
+                    recognition.onresult = (event) => {
+                        for (let i = event.resultIndex; i < event.results.length; i++) {
+                            if (event.results[i].isFinal) {
+                                finalTranscript += event.results[i][0].transcript + ' ';
+                                originalText.value = finalTranscript;
+                                correctBtn.disabled = false;
+                            }
+                        }
+                    };
+
+                    recognition.onerror = (event) => {
+                        console.error("Recognition error:", event.error);
+                        showError("Recognition error: " + event.error);
+                        stopRecording();
+                    };
+
+                    recognition.onend = () => {
+                        if (!stopBtn.disabled) {
+                            recognition.start();
+                        }
+                    };
+
+                    recognition.start();
+                } catch (error) {
+                    console.error("Error starting recording:", error);
+                    showError("Error: " + error.message);
+                    startBtn.disabled = false;
+                    stopBtn.disabled = true;
+                }
+            }
+
+            function stopRecording() {
+                if (recognition) {
+                    recognition.stop();
+                    startBtn.disabled = false;
+                    stopBtn.disabled = true;
+                    status.textContent = "Recording stopped. Correcting...";
+                }
+            }
+
+            async function correctWithGemini() {
+                if (!finalTranscript.trim()) {
+                    showError("No text to correct");
+                    return;
+                }
+
+                correctBtn.disabled = true;
+                status.textContent = "Correction in progress...";
+                hideError();
+
+                try {
+                    const response = await fetch('http://127.0.0.1:5000/correct_text', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ text: finalTranscript })
+                    });
+
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(errorText || "API request failed");
+                    }
+
+                    const data = await response.json();
+
+                    correctedText.value = data.corrected;
+                    status.textContent = "Correction complete!";
+                } catch (error) {
+                    console.error("Error:", error);
+                    showError(`Failed: ${error.message}`);
+                } finally {
+                    correctBtn.disabled = false;
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
